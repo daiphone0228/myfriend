@@ -40,11 +40,11 @@ $dbh=null;
     <title>myFriends</title>
 
     <!-- Bootstrap -->
-    <link href="../assets/css/bootstrap.css" rel="stylesheet">
-    <link href="../assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="../assets/css/form.css" rel="stylesheet">
-    <link href="../assets/css/timeline.css" rel="stylesheet">
-    <link href="../assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="assets/css/form.css" rel="stylesheet">
+    <link href="assets/css/timeline.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -64,7 +64,7 @@ $dbh=null;
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="index.html"><span class="strong-title"><i class="fa fa-facebook-square"></i> My friends</span></a>
+              <a class="navbar-brand" href="index.php"><span class="strong-title"><i class="fa fa-facebook-square"></i> My friends</span></a>
           </div>
           <!-- Collect the nav links, forms, and other content for toggling -->
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -94,7 +94,7 @@ $dbh=null;
             foreach ($posts as $post) { ?>
             <tr>
               <td><div class="text-center"><?php echo $post['area_id'];?></div></td>
-              <td><div class="text-center"><a href="show.html"><?php echo $post['area_name'];?></a></div></td>
+              <td><div class="text-center"><a href="show.php?area_id=<?php echo $post['area_id'];?>"><?php echo $post['area_name'];?></a></div></td>
               <td><div class="text-center">3</div></td>
             </tr>
             <?php

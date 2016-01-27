@@ -1,4 +1,4 @@
-<?php
+<?php 
 $dsn = 'mysql:dbname=myfriends;host=localhost';
 $user = 'root';
 $password = '';
@@ -6,29 +6,56 @@ $password = '';
 $dbh = new PDO($dsn,$user,$password);
 $dbh->query('SET NAMES utf8');
 
-$sql = 'SELECT * FROM `areas` ORDER BY `area_id`';
-//var_dump($sql);
+$area_id = $_GET['area_id'];
 
+// 都道府県名を表示するための処理
+$sql = 'SELECT * FROM `areas` WHERE `area_id` =' . $area_id;
 
+// SQL実行
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
-$posts = array();
-// var_dump($stmt);
+
+// 実行結果を格納
+$area = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// 友達リストを表示する処理
+$sql = 'SELECT * FROM `friends` WHERE `area_id` =' . $area_id;
+
+// SQL実行
+$stmt = $dbh->prepare($sql);
+$stmt->execute();
+
+// 取得データ格納用Array
+$friends = array();
+
+// 男女カウント用変数
+$male = 0;
+$female = 0;
+
 while(1){
-	$rec = $stmt->fetch(PDO::FETCH_ASSOC);
-	if($rec == false){
-		break;
-	}
-	$posts[] = $rec;
-	// echo $rec['area_id'];
-	// echo $rec['area_name'].'<br />';
-	//echo '<br />';
+  // データ取得
+  $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+  if($rec == false){
+    break;
+  }
+  //データ格納
+  $friends[]=$rec;
+
+  if ($rec['gender'] == 1) {
+    $male++;
+  } elseif($rec['gender'] == 2){
+    $female++;
+  }
 }
 
-$dbh=null;
-//var_dump($posts);
+//var_dump($friends);
 
-?>
+// DB切断
+$dbh=null;
+
+
+?> 
+
 
 <!DOCTYPE html>
 <html lang="ja">
@@ -40,11 +67,11 @@ $dbh=null;
     <title>myFriends</title>
 
     <!-- Bootstrap -->
-    <link href="../assets/css/bootstrap.css" rel="stylesheet">
-    <link href="../assets/font-awesome/css/font-awesome.css" rel="stylesheet">
-    <link href="../assets/css/form.css" rel="stylesheet">
-    <link href="../assets/css/timeline.css" rel="stylesheet">
-    <link href="../assets/css/main.css" rel="stylesheet">
+    <link href="assets/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="assets/css/form.css" rel="stylesheet">
+    <link href="assets/css/timeline.css" rel="stylesheet">
+    <link href="assets/css/main.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -52,6 +79,7 @@ $dbh=null;
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
+
   </head>
   <body>
   <nav class="navbar navbar-default navbar-fixed-top">
@@ -64,7 +92,7 @@ $dbh=null;
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
               </button>
-              <a class="navbar-brand" href="index.html"><span class="strong-title"><i class="fa fa-facebook-square"></i> My friends</span></a>
+              <a class="navbar-brand" href="index.php"><span class="strong-title"><i class="fa fa-facebook-square"></i> My friends</span></a>
           </div>
           <!-- Collect the nav links, forms, and other content for toggling -->
           <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
@@ -79,29 +107,34 @@ $dbh=null;
   <div class="container">
     <div class="row">
       <div class="col-md-4 content-margin-top">
-      <legend>都道府県一覧</legend>
-        <table class="table table-striped table-bordered table-hover table-condensed">
+      <legend><?php echo $area['area_name']; ?>の友達</legend>
+      <div class="well">男性：<?php echo $male; ?>名　女性：<?php echo $female; ?>名</div>
+        <table class="table table-striped table-hover table-condensed">
           <thead>
             <tr>
-              <th><div class="text-center">id</div></th>
-              <th><div class="text-center">県名</div></th>
-              <th><div class="text-center">人数</div></th>
+              <th><div class="text-center">名前</div></th>
+              <th><div class="text-center"></div></th>
             </tr>
           </thead>
           <tbody>
             <!-- id, 県名を表示 -->
-            <?php
-            foreach ($posts as $post) { ?>
+            <?php foreach ($friends as $friend) { ?>
             <tr>
-              <td><div class="text-center"><?php echo $post['area_id'];?></div></td>
-              <td><div class="text-center"><a href="show.html"><?php echo $post['area_name'];?></a></div></td>
-              <td><div class="text-center">3</div></td>
+              <td><div class="text-center"><?php echo $friend['friend_name']; ?></div></td>
+              <td>
+                <div class="text-center">
+                  <a href="edit.php?friend_id=<?php echo $friend['friend_id']; ?>"><i class="fa fa-pencil"></i></a>&nbsp;&nbsp;&nbsp;&nbsp;
+                  <a href="javascript:void(0);" onclick="destroy();"><i class="fa fa-trash"></i></a>
+                </div>
+              </td>
             </tr>
-            <?php
-        	}
-        	?>
+            <?php 
+            } 
+            ?>
           </tbody>
         </table>
+
+        <input type="button" class="btn btn-default" value="新規作成" onClick="location.href='new.php'">
       </div>
     </div>
   </div>
