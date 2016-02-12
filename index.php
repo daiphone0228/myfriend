@@ -6,24 +6,62 @@ $password = '';
 $dbh = new PDO($dsn,$user,$password);
 $dbh->query('SET NAMES utf8');
 
-$sql = 'SELECT * FROM `areas` ORDER BY `area_id`';
+$sql = 'SELECT `areas`.`area_id`,`areas`.`area_name`,COUNT(`friends`.`friend_id`) AS friends_cnt FROM `areas` LEFT OUTER JOIN `friends` ON `areas`.`area_id` = `friends`.`area_id` WHERE 1 GROUP BY `areas`.`area_id`';
 //var_dump($sql);
-
 
 $stmt = $dbh->prepare($sql);
 $stmt->execute();
-$posts = array();
+$areas = array();
 // var_dump($stmt);
 while(1){
 	$rec = $stmt->fetch(PDO::FETCH_ASSOC);
 	if($rec == false){
 		break;
 	}
-	$posts[] = $rec;
+	$areas[] = $rec;
 	// echo $rec['area_id'];
 	// echo $rec['area_name'].'<br />';
 	//echo '<br />';
 }
+
+// 検索機能DB追加
+// if(isset($_POST) && !empty($_POST)){
+//   $sql = 'SELECT * FROM `friends` WHERE `friend_name` LIKE %'.$searches.'%';
+//   $stmt = $dbh->prepare($sql);
+//   $stmt->execute();
+//   $searches = array();
+//   while(1){
+//   $rec2 = $stmt->fetch(PDO::FETCH_ASSOC);
+//   if($rec2 == false){
+//     break;
+//   }
+//   $searches[] = $rec2;
+//   var_dump($searches);
+// }
+
+// 友達のあいまい検索
+// POSTがあるかどうかチェック
+$friends = array();
+if (isset($_POST) && !empty($_POST['search_friend'])) {
+  $sql = 'SELECT * FROM `friends` WHERE `friend_name`LIKE "%'.$_POST['search_friend'].'%"';
+
+  $stmt = $dbh->prepare($sql);
+  $stmt->execute();
+
+  while (1) {
+    // データ取得
+    $rec = $stmt->fetch(PDO::FETCH_ASSOC);
+    if($rec == false){
+      break;
+    }
+
+    $friends[]=$rec;
+  }
+
+}
+
+
+
 
 $dbh=null;
 //var_dump($posts);
@@ -79,6 +117,27 @@ $dbh=null;
   <div class="container">
     <div class="row">
       <div class="col-md-4 content-margin-top">
+      <legend>友達検索</legend>
+        <p>
+        <form method="post" action="index.php">
+        <input type="text" name="search_friend" value="">
+        <input type="submit" class="btn btn-default" value="検索">
+        </form>
+        <p>
+          <table class="table table-striped table-bordered table-hover table-condensed">
+          <thead>
+            <tr>
+              <th><div class="text-center">友達の名前</div></th>
+            </tr>
+          <tbody>
+          <?php 
+          foreach ($friends as $friend) { ?>
+            <tr>
+              <td><div class="text-center"><?php echo $friend['friend_name']; ?></div></td>
+            </tr>
+          <?php } ?>
+          </tbody>
+          </thead>
       <legend>都道府県一覧</legend>
         <table class="table table-striped table-bordered table-hover table-condensed">
           <thead>
@@ -91,15 +150,15 @@ $dbh=null;
           <tbody>
             <!-- id, 県名を表示 -->
             <?php
-            foreach ($posts as $post) { ?>
+            foreach ($areas as $area) { ?>
             <tr>
-              <td><div class="text-center"><?php echo $post['area_id'];?></div></td>
-              <td><div class="text-center"><a href="show.php?area_id=<?php echo $post['area_id'];?>"><?php echo $post['area_name'];?></a></div></td>
-              <td><div class="text-center">3</div></td>
+              <td><div class="text-center"><?php echo $area['area_id'];?></div></td>
+              <td><div class="text-center"><a href="show.php?area_id=<?php echo $area['area_id'];?>"><?php echo $area['area_name'];?></a></div></td>
+              <td><div class="text-center"><?php echo $area['friends_cnt']; ?></div></td>
             </tr>
             <?php
-        	}
-        	?>
+        	   }
+        	   ?>
           </tbody>
         </table>
       </div>
